@@ -30,7 +30,7 @@ def resource_path(relative_path):
 class DanawaImageDownloader:
     def __init__(self):
         self.root = Tk()
-        self.root.title("다나와 이미지 다운로더 by Se Hyun")
+        self.root.title("다나와 이미지 다운로더 by noName_Come")
         self.root.geometry("400x500")
         self.root.resizable(False, False)
         
