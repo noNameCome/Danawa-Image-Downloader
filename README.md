@@ -7,9 +7,8 @@
 ![Image](https://github.com/user-attachments/assets/81c7bef0-3418-47d2-8936-61a642781dfe)
 
 입력 url 
-# https://prod.danawa.com/info/?pcode=75075386 <br>
-
-# 75075386 <br>
+https://prod.danawa.com/info/?pcode=75075386 <br>
+75075386 <br>
  
 
 다나와 상품 이미지 와 상세페이지 를 다운로드 하기 위한 프로그램입니다. 
