@@ -1,13 +1,11 @@
 import os
 import re
 import requests
-import sys
 from urllib.parse import urlparse, parse_qs
-from tkinter import Tk, Label, Entry, Button, Text, END, Scrollbar, RIGHT, Y, Frame, LEFT, font, ttk, DoubleVar
+from tkinter import Tk, Label, Button, Text, END, Scrollbar, RIGHT, Y, Frame, LEFT, font, ttk, DoubleVar
 from bs4 import BeautifulSoup
 import threading
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
@@ -15,17 +13,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import subprocess
-import concurrent.futures
-from functools import lru_cache
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 class DanawaImageDownloader:
     def __init__(self):
@@ -36,14 +23,14 @@ class DanawaImageDownloader:
         
         # 스타일 설정
         self.style = {
-            'bg_color': '#2b2b2b',  # 어두운 배경
-            'text_color': '#ffffff',  # 흰색 텍스트
-            'button_bg': '#404040',  # 버튼 배경
-            'button_fg': '#ffffff',  # 버튼 텍스트
-            'button_active_bg': '#505050',  # 버튼 활성화 색상
-            'input_bg': '#363636',  # 입력 필드 배경
-            'input_fg': '#ffffff',  # 입력 필드 텍스트
-            'font_family': 'Segoe UI',  # 폰트
+            'bg_color': '#2b2b2b',
+            'text_color': '#ffffff',
+            'button_bg': '#404040',
+            'button_fg': '#ffffff',
+            'button_active_bg': '#505050',
+            'input_bg': '#363636',
+            'input_fg': '#ffffff',
+            'font_family': 'Segoe UI',
             'title_font_size': 12,
             'text_font_size': 10,
             'button_font_size': 10
@@ -120,9 +107,13 @@ class DanawaImageDownloader:
         button_frame = Frame(main_frame, bg=self.style['bg_color'])
         button_frame.pack(fill='x', pady=(0, 10))
         
+        # 버튼을 담을 내부 프레임 (가운데 정렬용)
+        button_container = Frame(button_frame, bg=self.style['bg_color'])
+        button_container.pack(expand=True)
+        
         # 다운로드 버튼
         Button(
-            button_frame,
+            button_container,
             text="이미지 다운로드",
             command=self.start_download,
             font=(self.style['font_family'], self.style['button_font_size']),
@@ -137,7 +128,7 @@ class DanawaImageDownloader:
         
         # 폴더 열기 버튼
         Button(
-            button_frame,
+            button_container,
             text="폴더 열기",
             command=self.open_folder,
             font=(self.style['font_family'], self.style['button_font_size']),
@@ -210,7 +201,9 @@ class DanawaImageDownloader:
         
         # HTTP 세션 초기화
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Mozilla/5.0"})
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        })
         
         # Selenium 웹드라이버 초기화
         self.driver = None
@@ -222,11 +215,16 @@ class DanawaImageDownloader:
         self.total_images = 0
         self.downloaded_images = 0
         
+    def log(self, message):
+        """로그 메시지를 추가하고 자동으로 스크롤"""
+        self.log_text.insert(END, message + "\n")
+        self.log_text.see(END)
+        self.root.update_idletasks()
+        
     def init_selenium(self):
         if self.driver is None:
             try:
-                self.log_text.insert(END, "ChromeDriver 버전 확인 중...\n")
-                self.root.update_idletasks()
+                self.log("ChromeDriver 버전 확인 중...")
                 
                 options = webdriver.ChromeOptions()
                 options.add_argument('--headless')
@@ -238,30 +236,30 @@ class DanawaImageDownloader:
                 options.add_argument('--disable-logging')
                 options.add_argument('--log-level=3')
                 options.add_argument('--silent')
+                options.add_argument('--disable-notifications')
+                options.add_argument('--disable-popup-blocking')
+                options.add_argument('--disable-infobars')
+                options.add_argument('--disable-web-security')
+                options.add_argument('--disable-features=IsolateOrigins,site-per-process')
                 
-                # ChromeDriver 자동 설치 및 업데이트
                 service = ChromeService(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=options)
+                self.driver.set_page_load_timeout(30)
                 
-                self.log_text.insert(END, "ChromeDriver 초기화 완료\n")
-                self.root.update_idletasks()
+                self.log("ChromeDriver 초기화 완료")
                 
             except Exception as e:
-                self.log_text.insert(END, f"ChromeDriver 초기화 오류: {str(e)}\n")
+                self.log(f"ChromeDriver 초기화 오류: {str(e)}")
                 self.driver = None
             
     def close_selenium(self):
         if self.driver:
-            self.driver.quit()
-            self.driver = None
-            
-    @lru_cache(maxsize=100)
-    def check_image_exists(self, url):
-        try:
-            response = self.session.head(url, timeout=5)
-            return response.status_code == 200
-        except:
-            return False
+            try:
+                self.driver.quit()
+            except:
+                pass
+            finally:
+                self.driver = None
             
     def download_image_parallel(self, url, folder, filename):
         try:
@@ -273,7 +271,7 @@ class DanawaImageDownloader:
                 return True
             return False
         except Exception as e:
-            self.log_text.insert(END, f"Error downloading {url}: {str(e)}\n")
+            self.log(f"Error downloading {url}: {str(e)}")
             return False
             
     def extract_pcode(self, text):
@@ -294,6 +292,10 @@ class DanawaImageDownloader:
         
     def get_product_images(self, pcode):
         try:
+            # 대기 메시지 표시
+            self.progress_label.config(text="잠시만 기다려주세요... 이미지를 찾는 중입니다.")
+            self.root.update_idletasks()
+            
             # 1. 썸네일 이미지 URL 생성
             thumbnail_urls = []
             for i in range(1, 6):
@@ -303,10 +305,13 @@ class DanawaImageDownloader:
                     '890px': f"{base_url}?shrink=890",
                     'original': base_url
                 })
-                self.log_text.insert(END, f"Generated thumbnail URL: {base_url}\n")
+                self.log(f"Generated thumbnail URL: {base_url}")
             
             # 2. 상세페이지 이미지 URL 생성
             self.init_selenium()
+            if not self.driver:
+                return thumbnail_urls
+                
             url = f"https://prod.danawa.com/info/?pcode={pcode}"
             self.driver.get(url)
             
@@ -316,14 +321,14 @@ class DanawaImageDownloader:
                     EC.presence_of_element_located((By.CSS_SELECTOR, "button.btn_more"))
                 )
                 more_button.click()
-                self.log_text.insert(END, "Clicked '상품정보 더보기' button\n")
+                self.log("Clicked '상품정보 더보기' button")
                 
                 # 추가 콘텐츠가 로드될 때까지 대기
                 WebDriverWait(self.driver, 5).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, ".detail_cont"))
                 )
             except TimeoutException:
-                self.log_text.insert(END, "No '상품정보 더보기' button found or timeout\n")
+                self.log("No '상품정보 더보기' button found or timeout")
             
             # 페이지 소스 가져오기
             page_source = self.driver.page_source
@@ -331,7 +336,7 @@ class DanawaImageDownloader:
             
             # 상세페이지에서 이미지 찾기
             detail_images = soup.select('.detail_cont img, .detail_cont a img, .prod_detail img, .prod_detail a img, .detail_cont div img, .prod_detail div img')
-            self.log_text.insert(END, f"Found {len(detail_images)} detail images\n")
+            self.log(f"Found {len(detail_images)} detail images")
             
             detail_urls = []
             for img in detail_images:
@@ -349,15 +354,18 @@ class DanawaImageDownloader:
                             '890px': f"{base_url}?shrink=890",
                             'original': base_url
                         })
-                        self.log_text.insert(END, f"Found detail image URL: {base_url}\n")
+                        self.log(f"Found detail image URL: {base_url}")
             
             return thumbnail_urls + detail_urls
             
         except Exception as e:
-            self.log_text.insert(END, f"Error fetching images from page: {str(e)}\n")
-            return thumbnail_urls  # 에러가 발생해도 썸네일 URL은 반환
+            self.log(f"Error fetching images from page: {str(e)}")
+            return thumbnail_urls
         finally:
             self.close_selenium()
+            # 대기 메시지 초기화
+            self.progress_label.config(text="")
+            self.root.update_idletasks()
             
     def process_direct_image_url(self, url):
         try:
@@ -384,20 +392,23 @@ class DanawaImageDownloader:
             filename_890 = f"{os.path.splitext(filename)[0]}_890px.jpg"
             
             if self.download_image_parallel(f"{base_url}?shrink=500", product_folder, filename_500):
-                self.log_text.insert(END, f"Downloaded 500px version of {filename}\n")
+                self.log(f"Downloaded 500px version of {filename}")
             
             if self.download_image_parallel(f"{base_url}?shrink=890", product_folder, filename_890):
-                self.log_text.insert(END, f"Downloaded 890px version of {filename}\n")
+                self.log(f"Downloaded 890px version of {filename}")
                 
         except Exception as e:
-            self.log_text.insert(END, f"Error processing direct image URL: {e}\n")
+            self.log(f"Error processing direct image URL: {e}")
             
     def update_progress(self, current, total):
         """프로그레스 바 업데이트"""
-        progress = (current / total) * 100
-        self.progress_var.set(progress)
-        self.progress_label.config(text=f"다운로드 중... {current}/{total} ({progress:.1f}%)")
-        self.root.update_idletasks()
+        try:
+            progress = min((current / total) * 100, 100)
+            self.progress_var.set(progress)
+            self.progress_label.config(text=f"다운로드 중... {current}/{total} ({progress:.1f}%)")
+            self.root.update_idletasks()
+        except:
+            pass
         
     def process_url(self, url):
         url = url.strip()
@@ -405,16 +416,16 @@ class DanawaImageDownloader:
             return
             
         if self.is_direct_image_url(url):
-            self.log_text.insert(END, f"\nProcessing direct image URL: {url}\n")
+            self.log(f"\nProcessing direct image URL: {url}")
             self.process_direct_image_url(url)
             return
             
         pcode = self.extract_pcode(url)
         if not pcode:
-            self.log_text.insert(END, f"Invalid URL: {url}\n")
+            self.log(f"Invalid URL: {url}")
             return
             
-        self.log_text.insert(END, f"\nProcessing product code: {pcode}\n")
+        self.log(f"\nProcessing product code: {pcode}")
         
         # Create folder for this product
         product_folder = os.path.join(self.base_folder, pcode)
@@ -426,10 +437,10 @@ class DanawaImageDownloader:
         # Get and download images
         images = self.get_product_images(pcode)
         if not images:
-            self.log_text.insert(END, f"No images found for product {pcode}\n")
+            self.log(f"No images found for product {pcode}")
             return
             
-        self.log_text.insert(END, f"Found {len(images)} images\n")
+        self.log(f"Found {len(images)} images")
         
         # 다운로드 진행 상태 초기화
         self.total_images = len(images)
@@ -441,9 +452,9 @@ class DanawaImageDownloader:
             if i < len(images):
                 filename = f"image_{i+1}_500px.jpg"
                 if self.download_image_parallel(images[i]['500px'], product_folder, filename):
-                    self.log_text.insert(END, f"Downloaded thumbnail image {i+1}\n")
+                    self.log(f"Downloaded thumbnail image {i+1}")
                 else:
-                    self.log_text.insert(END, f"Failed to download thumbnail image {i+1}\n")
+                    self.log(f"Failed to download thumbnail image {i+1}")
                 self.downloaded_images += 1
                 self.update_progress(self.downloaded_images, self.total_images)
         
@@ -453,9 +464,9 @@ class DanawaImageDownloader:
             for i, img in enumerate(detail_images, 1):
                 filename = f"상세페이지_{i}.jpg"
                 if self.download_image_parallel(img['original'], product_folder, filename):
-                    self.log_text.insert(END, f"Downloaded detail page image {i}\n")
+                    self.log(f"Downloaded detail page image {i}")
                 else:
-                    self.log_text.insert(END, f"Failed to download detail page image {i}\n")
+                    self.log(f"Failed to download detail page image {i}")
                 self.downloaded_images += 1
                 self.update_progress(self.downloaded_images, self.total_images)
         
@@ -467,7 +478,7 @@ class DanawaImageDownloader:
     def start_download(self):
         urls = self.url_text.get("1.0", END).strip().split("\n")
         self.log_text.delete("1.0", END)
-        self.log_text.insert(END, "Starting download process...\n")
+        self.log("Starting download process...")
         
         # Process URLs in a separate thread to keep GUI responsive
         def download_thread():
@@ -475,7 +486,7 @@ class DanawaImageDownloader:
                 for url in urls:
                     if url.strip():
                         self.process_url(url)
-                self.log_text.insert(END, "\nDownload process completed!\n")
+                self.log("\nDownload process completed!")
             finally:
                 self.close_selenium()
                 self.session.close()
@@ -496,9 +507,9 @@ class DanawaImageDownloader:
             else:  # macOS 또는 Linux
                 subprocess.run(['open', folder_path])
                 
-            self.log_text.insert(END, f"Opened folder: {folder_path}\n")
+            self.log(f"Opened folder: {folder_path}")
         except Exception as e:
-            self.log_text.insert(END, f"Error opening folder: {str(e)}\n")
+            self.log(f"Error opening folder: {str(e)}")
         
     def run(self):
         try:
