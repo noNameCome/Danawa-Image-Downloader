@@ -91,7 +91,7 @@ class DanawaImageDownloader:
         
         Label(
             input_frame,
-            text="다나와 상품 URL 또는 이미지 URL을 입력하세요",
+            text="다나와 상품 URL 또는 상품 번호를 입력하세요",
             font=(self.style['font_family'], self.style['text_font_size']),
             bg=self.style['bg_color'],
             fg=self.style['text_color']
