@@ -10,6 +10,8 @@
 
 ![Image](https://github.com/user-attachments/assets/2dfb7d92-c1b3-4e3d-89d9-463bacd231fa)
 
+![Image](https://github.com/user-attachments/assets/0cea1e4b-3db8-4b24-bcd0-6701db46ec1b)
+
 
 # ✅ 사용 예시
 입력 가능한 URL 형식:
