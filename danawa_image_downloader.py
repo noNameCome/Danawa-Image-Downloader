@@ -13,19 +13,30 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import subprocess
+import sys
 
 class DanawaImageDownloader:
     def __init__(self):
         self.root = Tk()
-        self.root.title("다나와 이미지 다운로더 by noName_Come")
+        self.root.title("다나와 이미지 다운로더 By noName_Come")
         self.root.geometry("400x500")
         self.root.resizable(False, False)
         
         # 아이콘 설정
         try:
-            self.root.iconbitmap('icon.ico')
-        except:
-            pass  # 아이콘 파일이 없어도 프로그램은 계속 실행
+            if getattr(sys, 'frozen', False):
+                # PyInstaller로 만든 실행 파일일 경우
+                base_path = sys._MEIPASS
+            else:
+                # 일반 Python 스크립트로 실행할 경우
+                base_path = os.path.abspath(os.path.dirname(__file__))
+            
+            icon_path = os.path.join(base_path, 'icon.ico')
+            self.root.iconbitmap(default=icon_path)
+            self.root.wm_iconbitmap(icon_path)
+        except Exception as e:
+            print(f"Icon load error: {e}")
+            pass
         
         # 스타일 설정
         self.style = {
@@ -188,18 +199,17 @@ class DanawaImageDownloader:
             padx=10,
             pady=5
         )
-        self.log_text.pack(side=LEFT, fill='both', expand=True)
+        self.log_text.pack(fill='both', expand=True)
         
-        # 스크롤바
-        scroll = Scrollbar(
-            log_frame,
-            command=self.log_text.yview,
-            bg=self.style['button_bg'],
-            troughcolor=self.style['input_bg'],
-            relief='flat'
-        )
-        scroll.pack(side=RIGHT, fill=Y)
-        self.log_text.config(yscrollcommand=scroll.set)
+        # 마우스 스크롤 이벤트 바인딩
+        self.log_text.bind('<MouseWheel>', lambda e: self.log_text.yview_scroll(int(-1*(e.delta/120)), "units"))
+        self.log_text.bind('<Button-4>', lambda e: self.log_text.yview_scroll(-1, "units"))
+        self.log_text.bind('<Button-5>', lambda e: self.log_text.yview_scroll(1, "units"))
+        
+        # URL 입력 텍스트 영역에도 마우스 스크롤 적용
+        self.url_text.bind('<MouseWheel>', lambda e: self.url_text.yview_scroll(int(-1*(e.delta/120)), "units"))
+        self.url_text.bind('<Button-4>', lambda e: self.url_text.yview_scroll(-1, "units"))
+        self.url_text.bind('<Button-5>', lambda e: self.url_text.yview_scroll(1, "units"))
         
         # 다운로드 폴더 생성
         self.base_folder = "danawa_images"
