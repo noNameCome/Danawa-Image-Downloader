@@ -21,6 +21,12 @@ class DanawaImageDownloader:
         self.root.geometry("400x500")
         self.root.resizable(False, False)
         
+        # 아이콘 설정
+        try:
+            self.root.iconbitmap('icon.ico')
+        except:
+            pass  # 아이콘 파일이 없어도 프로그램은 계속 실행
+        
         # 스타일 설정
         self.style = {
             'bg_color': '#2b2b2b',
