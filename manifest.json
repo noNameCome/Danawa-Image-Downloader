@@ -1,0 +1,46 @@
+{
+    "manifest_version": 3,
+    "name": "다나와 이미지 다운로더 By 오마이피씨",
+    "version": "1.0",
+    "description": "다나와 상품 이미지를 쉽게 다운로드할 수 있는 확장 프로그램",
+    "permissions": [
+        "activeTab",
+        "downloads",
+        "downloads.open",
+        "downloads.removeFile",
+        "scripting",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://prod.danawa.com/*",
+        "https://img.danawa.com/*",
+        "https://iws.danawa.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Alt+1"
+            },
+            "description": "다나와 이미지 다운로더 열기"
+        }
+    }
+} 
