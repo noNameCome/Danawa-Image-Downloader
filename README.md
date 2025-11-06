@@ -1,16 +1,9 @@
-### 🛠 다나와 상품 이미지 & 상세페이지 다운로드 툴
+### 🛠 다나와 상품 이미지 & 상세페이지 다운로드 크롬 확장프로그램
 ## 다나와 상품의 대표 이미지, 상세페이지 이미지를 다운로드할 수 있는 프로그램입니다. <br>
 # 🖼 프로그램 실행 화면
 
-![Image](https://github.com/user-attachments/assets/886cf846-b279-4164-a55f-c6b6761045f5)
+<img width="314" height="501" alt="image" src="https://github.com/user-attachments/assets/7047237c-945f-407a-92d1-67d56649fc63" />
 
-![Image](https://github.com/user-attachments/assets/886cf846-b279-4164-a55f-c6b6761045f5)
-
-![Image](https://github.com/user-attachments/assets/bc85a088-64dd-4880-af11-a38bc0af3caf)
-
-![Image](https://github.com/user-attachments/assets/2dfb7d92-c1b3-4e3d-89d9-463bacd231fa)
-
-![Image](https://github.com/user-attachments/assets/0cea1e4b-3db8-4b24-bcd0-6701db46ec1b)
 
 
 # ✅ 사용 예시
@@ -29,4 +22,6 @@ https://prod.danawa.com/info/?pcode=75075386
 URL 또는 상품코드 입력만으로 사용 가능
 
 GUI 기반 간편한 사용성
+
+
 
