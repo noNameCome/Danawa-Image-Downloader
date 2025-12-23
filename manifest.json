@@ -1,20 +1,26 @@
 {
     "manifest_version": 3,
-    "name": "다나와 이미지 다운로더 By 오마이피씨",
-    "version": "1.0",
-    "description": "다나와 상품 이미지를 쉽게 다운로드할 수 있는 확장 프로그램",
+    "name": "상품 이미지 다운로더 By 오마이피씨",
+    "version": "2.0",
+    "description": "다나와/컴퓨존 상품 이미지를 쉽게 다운로드할 수 있는 확장 프로그램",
     "permissions": [
         "activeTab",
         "downloads",
         "downloads.open",
         "downloads.removeFile",
         "scripting",
-        "tabs"
+        "tabs",
+        "clipboardRead"
     ],
     "host_permissions": [
         "https://prod.danawa.com/*",
         "https://img.danawa.com/*",
-        "https://iws.danawa.com/*"
+        "https://iws.danawa.com/*",
+        "https://www.compuzone.co.kr/*",
+        "https://image2.compuzone.co.kr/*",
+        "https://image3.compuzone.co.kr/*",
+        "https://image5.compuzone.co.kr/*",
+        "https://gi.esmplus.com/*"
     ],
     "background": {
         "service_worker": "background.js",
@@ -40,7 +46,7 @@
             "suggested_key": {
                 "default": "Alt+1"
             },
-            "description": "다나와 이미지 다운로더 열기"
+            "description": "상품 이미지 다운로더 열기"
         }
     }
 } 
